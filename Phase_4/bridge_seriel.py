@@ -1,10 +1,11 @@
+# Bridge Meshtastic : reçoit les messages du réseau LoRa, interroge l'IA, renvoie les réponses
 import meshtastic
 import meshtastic.serial_interface
 from pubsub import pub
 import sys, time
 from pathlib import Path
 
-# import RAG et Whitelist
+# Importe RAG et Whitelist
 BASE_DIR = Path(__file__).parent.parent
 sys.path.append(str(BASE_DIR))
 
@@ -15,39 +16,37 @@ except ImportError:
     print("Erreur : Phase_2/rag_engine.py ou Phase_5/whitelist.py introuvable.")
     sys.exit()
 
+# Callback appelé à la réception d'un message LoRa
 def on_receive(packet, interface):
-    """Fonction appelee a chaque reception de message LoRa."""
     try:
-        # traite que les messages texte 
+        # Traite uniquement les messages texte
         if 'decoded' in packet and packet['decoded'].get('portnum') == 'TEXT_MESSAGE_APP':
             
-            # ignore les messages que le bridge envoie lui-meme
+            # Ignore les messages du bridge lui-même
             if packet.get('from') == interface.myInfo.my_node_num:
                 return
 
-            sender = packet['fromId'] # L'ID de l'emetteur 
+            sender = packet['fromId']
             
-            # Verification de l'ID de l'emetteur
+            # Vérifie l'autorisation de l'utilisateur
             if sender not in ALLOWED_USERS:
-                print(f"ACCES REFUSE : L'utilisateur {sender} n'est pas autorise.")
+                print(f"ACCES REFUSE : {sender} non autorisé.")
                 return
 
             question = packet['decoded']['text']
+            print(f"ACCES OK : {sender}")
+            print(f"Question : {question}")
             
-            print(f"ACCES AUTORISE pour {sender}")
-            print(f"Question recue : {question}")
-            
-            # Generation de la reponse via le moteur RAG
-            print("Generation de la reponse...")
+            # Génère la réponse via RAG
             reponse = executer_rag(question)
             
-            # Envoi de la reponse via le XIAO
+            # Envoie la réponse au réseau
             print(f"ENVOI ({len(reponse)} octets) : {reponse}")
             interface.sendText(reponse, destinationId=sender)
-            print("Transmis avec succes au reseau Mesh.")
+            print("Transmis.")
 
     except Exception as e:
-        print(f"Erreur lors du traitement du paquet : {e}")
+        print(f"Erreur : {e}")
 
 def main():
     # port COM specifique

@@ -1,10 +1,12 @@
 import os
 import ollama
 
+# Config modèle et CPU
 DEFAULT_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
 CPU_THREADS = max(2, (os.cpu_count() or 4))
 
-def demander_a_ia(prompt, *, max_tokens=96, stream=False):
+# Envoie une requête à l'IA et retourne la réponse
+def demander_a_ia(prompt, *, max_tokens=96):
     try:
         resp = ollama.chat(
             model=DEFAULT_MODEL,
@@ -20,23 +22,13 @@ def demander_a_ia(prompt, *, max_tokens=96, stream=False):
             ],
             options={
                 "num_predict": max_tokens,
-                "temperature": 0.1,
+                "temperature": 0.1,  # Déterministe
                 "num_thread": CPU_THREADS,
                 "top_p": 0.9,
             },
-            stream=stream,
         )
 
-        if stream:
-            chunks = []
-            for chunk in resp:
-                content = chunk.get("message", {}).get("content", "")
-                if content:
-                    print(content, end="", flush=True)
-                    chunks.append(content)
-            print()
-            return "".join(chunks)
-        else:
-            return resp["message"]["content"]
+        # Retourne la réponse complète
+        return resp["message"]["content"]
     except Exception as e:
         return f"Erreur : {e}"

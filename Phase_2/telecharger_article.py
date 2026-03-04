@@ -1,3 +1,4 @@
+# Télécharge les articles Wikipedia en français
 import wikipediaapi
 import os
 
@@ -7,15 +8,15 @@ def telecharger_articles():
         language='fr'
     )
     
-    # Ta liste des 6 articles
+    # Articles cibles du projet
     sujets = [
         "Orelsan",
-        "LoRaWAN",                          # Le standard du réseau LoRa
-        "Réseau maillé",                    # Le nom exact pour "Mesh"
+        "LoRaWAN",
+        "Réseau maillé",
         "Intelligence artificielle",
         "Micro-informatique",
-        "Interface de programmation",       # Le nom exact pour "API"
-        "Apprentissage automatique"         # Le nom exact pour "Machine Learning"
+        "Interface de programmation",
+        "Apprentissage automatique"
     ]
     
     if not os.path.exists('articles_bruts'):
@@ -29,7 +30,7 @@ def telecharger_articles():
                 f.write(page.text)
             print(f"✓ {sujet} téléchargé.")
         else:
-            print(f"✗ {sujet} introuvable sur Wikipédia.")
+            print(f"✗ {sujet} introuvable.")
 
 if __name__ == "__main__":
     telecharger_articles()
