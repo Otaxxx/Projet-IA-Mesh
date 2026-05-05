@@ -8,7 +8,7 @@ Projet Python qui :
 ## Prerequis
 - Windows 10/11
 - Python 3.10+ (recommande)
-- Ollama installe et lance
+- Ollama installé et lancé
 
 ## Installation
 Depuis la racine du projet :
